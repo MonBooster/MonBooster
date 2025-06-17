@@ -6,83 +6,124 @@
   <style>
     body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 2rem; background: #f7f7f7; }
     h1 { text-align: center; color: #333; }
-    button { padding: 10px 20px; font-size: 1rem; cursor: pointer; }
-    #cards { margin-top: 1rem; }
-    #collection { margin-top: 2rem; background: #fff; padding: 1rem; border-radius: 5px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
-    .card { display: inline-block; margin: 5px; padding: 10px; background: #ddeeff; border-radius: 4px; }
+    
+    /* Bouton sur image booster */
+    #boosterButton {
+      background: url('https://i.imgur.com/QZP7m7K.png') no-repeat center/contain;
+      width: 200px;
+      height: 200px;
+      border: none;
+      cursor: pointer;
+      display: block;
+      margin: 1rem auto;
+      position: relative;
+      outline: none;
+      transition: transform 0.3s ease;
+    }
+    #boosterButton:active {
+      transform: scale(0.95);
+    }
+    
+    /* Animation d'ouverture (simple rotation + échelle) */
+    #boosterButton.opening {
+      animation: openAnim 1s forwards;
+    }
+    @keyframes openAnim {
+      0% { transform: rotate(0deg) scale(1); }
+      50% { transform: rotate(20deg) scale(1.1); }
+      100% { transform: rotate(0deg) scale(1); }
+    }
+    
+    #cards {
+      margin-top: 1rem;
+      text-align: center;
+      font-weight: bold;
+      min-height: 50px;
+    }
+    
+    #collection {
+      margin-top: 2rem;
+      background: #fff;
+      padding: 1rem;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    #collection h2 {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    
+    .card {
+      display: inline-block;
+      margin: 5px;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      min-width: 80px;
+      text-align: center;
+      color: #fff;
+      font-weight: bold;
+      user-select: none;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      transition: transform 0.2s;
+    }
+    .card:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    
+    /* Couleurs selon rareté */
+    .common { background-color: #4caf50; }  /* vert */
+    .rare { background-color: #2196f3; }    /* bleu */
+    .epic { background-color: #9c27b0; }    /* violet */
+    
+    /* Modal d'inspection */
+    #modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    #modalContent {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 300px;
+      text-align: center;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      position: relative;
+    }
+    #modalContent h3 {
+      margin-top: 0;
+    }
+    #modalClose {
+      position: absolute;
+      top: 10px; right: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 1.2rem;
+      color: #333;
+    }
   </style>
 </head>
 <body>
   <h1>Ouvre ton booster !</h1>
-  <button id="openBooster">Ouvrir Booster</button>
+  <button id="boosterButton" title="Ouvrir booster"></button>
+  
   <div id="cards"></div>
 
   <div id="collection">
     <h2>Ma collection</h2>
     <div id="collectedCards"></div>
   </div>
-
-<script>
-  const allCards = ['Carte 1', 'Carte 2', 'Carte 3', 'Carte 4', 'Carte 5', 'Carte 6', 'Carte 7'];
-
-  // Charger la collection depuis localStorage (stockage local du navigateur)
-  let collection = JSON.parse(localStorage.getItem('collection')) || [];
-
-  function saveCollection() {
-    localStorage.setItem('collection', JSON.stringify(collection));
-  }
-
-  function displayCollection() {
-    const container = document.getElementById('collectedCards');
-    if (collection.length === 0) {
-      container.innerHTML = '<p>Tu n\'as pas encore de cartes.</p>';
-      return;
-    }
-    container.innerHTML = '';
-    collection.forEach(card => {
-      const div = document.createElement('div');
-      div.className = 'card';
-      div.textContent = card;
-      container.appendChild(div);
-    });
-  }
-
-  function openBooster() {
-    // Vérifier si booster déjà ouvert aujourd'hui
-    const lastOpen = localStorage.getItem('lastOpenDate');
-    const today = new Date().toISOString().split('T')[0]; // format YYYY-MM-DD
-    if (lastOpen === today) {
-      alert("Tu as déjà ouvert ton booster aujourd'hui, reviens demain !");
-      return;
-    }
-
-    // Tirer 2 cartes aléatoires différentes
-    let picked = [];
-    while (picked.length < 2) {
-      const card = allCards[Math.floor(Math.random() * allCards.length)];
-      if (!picked.includes(card)) picked.push(card);
-    }
-
-    // Afficher les cartes tirées
-    const cardsDiv = document.getElementById('cards');
-    cardsDiv.innerHTML = '<strong>Cartes tirées :</strong> ' + picked.join(', ');
-
-    // Ajouter à la collection (sans doublons)
-    picked.forEach(card => {
-      if (!collection.includes(card)) collection.push(card);
-    });
-    saveCollection();
-    displayCollection();
-
-    // Mettre à jour la date d'ouverture
-    localStorage.setItem('lastOpenDate', today);
-  }
-
-  document.getElementById('openBooster').addEventListener('click', openBooster);
-
-  // Afficher la collection au chargement
-  displayCollection();
-</script>
-
-</body>
-</html>
+  
+  <!-- Modal pour inspecter les cartes -->
+  <div id="modal">
+    <div id="modalContent">
+      <span id="modalClose">&times;</span>
+      <h3 id="modalTitle"></h3>
+      <p id="modalDescription"></p>
+      <p><strong>Rareté :</strong> <span id="modal
