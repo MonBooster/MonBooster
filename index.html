@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Booster Cards</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 2rem; background: #f7f7f7; }
+    h1 { text-align: center; color: #333; }
+    button { padding: 10px 20px; font-size: 1rem; cursor: pointer; }
+    #cards { margin-top: 1rem; }
+    #collection { margin-top: 2rem; background: #fff; padding: 1rem; border-radius: 5px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+    .card { display: inline-block; margin: 5px; padding: 10px; background: #ddeeff; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Ouvre ton booster !</h1>
+  <button id="openBooster">Ouvrir Booster</button>
+  <div id="cards"></div>
+
+  <div id="collection">
+    <h2>Ma collection</h2>
+    <div id="collectedCards"></div>
+  </div>
+
+<script>
+  const allCards = ['Carte 1', 'Carte 2', 'Carte 3', 'Carte 4', 'Carte 5', 'Carte 6', 'Carte 7'];
+
+  // Charger la collection depuis localStorage (stockage local du navigateur)
+  let collection = JSON.parse(localStorage.getItem('collection')) || [];
+
+  function saveCollection() {
+    localStorage.setItem('collection', JSON.stringify(collection));
+  }
+
+  function displayCollection() {
+    const container = document.getElementById('collectedCards');
+    if (collection.length === 0) {
+      container.innerHTML = '<p>Tu n\'as pas encore de cartes.</p>';
+      return;
+    }
+    container.innerHTML = '';
+    collection.forEach(card => {
+      const div = document.createElement('div');
+      div.className = 'card';
+      div.textContent = card;
+      container.appendChild(div);
+    });
+  }
+
+  function openBooster() {
+    // Vérifier si booster déjà ouvert aujourd'hui
+    const lastOpen = localStorage.getItem('lastOpenDate');
+    const today = new Date().toISOString().split('T')[0]; // format YYYY-MM-DD
+    if (lastOpen === today) {
+      alert("Tu as déjà ouvert ton booster aujourd'hui, reviens demain !");
+      return;
+    }
+
+    // Tirer 2 cartes aléatoires différentes
+    let picked = [];
+    while (picked.length < 2) {
+      const card = allCards[Math.floor(Math.random() * allCards.length)];
+      if (!picked.includes(card)) picked.push(card);
+    }
+
+    // Afficher les cartes tirées
+    const cardsDiv = document.getElementById('cards');
+    cardsDiv.innerHTML = '<strong>Cartes tirées :</strong> ' + picked.join(', ');
+
+    // Ajouter à la collection (sans doublons)
+    picked.forEach(card => {
+      if (!collection.includes(card)) collection.push(card);
+    });
+    saveCollection();
+    displayCollection();
+
+    // Mettre à jour la date d'ouverture
+    localStorage.setItem('lastOpenDate', today);
+  }
+
+  document.getElementById('openBooster').addEventListener('click', openBooster);
+
+  // Afficher la collection au chargement
+  displayCollection();
+</script>
+
+</body>
+</html>
